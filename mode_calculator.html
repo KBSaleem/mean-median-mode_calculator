@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mode Calculator for Grouped Data</title>
+
+  <!-- Chart.js for graphics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(120deg, #dfe9f3, #ffffff);
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      background-color: #0078d7;
+      color: white;
+      padding: 15px;
+      margin: 0;
+    }
+
+    #container {
+      margin-top: 20px;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      font-size: 1em;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 80%;
+    }
+
+    th, td {
+      border: 1px solid #888;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #0078d7;
+      color: white;
+    }
+
+    #chartContainer {
+      width: 80%;
+      margin: 30px auto;
+    }
+
+    #result {
+      font-size: 1.3em;
+      color: #0078d7;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Mode Calculator for Grouped Data</h1>
+
+  <div id="container">
+    <label for="num">Enter number of class intervals:</label>
+    <input type="number" id="num" min="1" max="20">
+    <button onclick="createTable()">Create Table</button>
+  </div>
+
+  <div id="tableContainer"></div>
+  <div id="result"></div>
+  <div id="chartContainer">
+    <canvas id="freqChart"></canvas>
+  </div>
+
+  <script>
+    let chartInstance = null;
+
+    function createTable() {
+      const n = parseInt(document.getElementById('num').value);
+      if (isNaN(n) || n <= 0) {
+        alert("Please enter a valid number of intervals!");
+        return;
+      }
+
+      let html = `<table><tr><th>Lower Limit</th><th>Upper Limit</th><th>Frequency</th></tr>`;
+      for (let i = 0; i < n; i++) {
+        html += `
+          <tr>
+            <td><input type="number" id="l${i}" step="any"></td>
+            <td><input type="number" id="u${i}" step="any"></td>
+            <td><input type="number" id="f${i}" step="any"></td>
+          </tr>`;
+      }
+      html += `</table>
+        <button onclick="calculateMode(${n})">Calculate Mode</button>`;
+      document.getElementById('tableContainer').innerHTML = html;
+      document.getElementById('result').innerHTML = "";
+    }
+
+    function calculateMode(n) {
+      let L = [], U = [], F = [];
+
+      for (let i = 0; i < n; i++) {
+        L.push(parseFloat(document.getElementById(`l${i}`).value));
+        U.push(parseFloat(document.getElementById(`u${i}`).value));
+        F.push(parseFloat(document.getElementById(`f${i}`).value));
+      }
+
+      // Validate input
+      if (F.some(isNaN) || L.some(isNaN) || U.some(isNaN)) {
+        alert("Please fill all fields properly!");
+        return;
+      }
+
+      // Find modal class
+      let modalIndex = F.indexOf(Math.max(...F));
+      let fm = F[modalIndex];
+      let f1 = modalIndex > 0 ? F[modalIndex - 1] : 0;
+      let f2 = modalIndex < n - 1 ? F[modalIndex + 1] : 0;
+      let h = U[modalIndex] - L[modalIndex];
+      let l = L[modalIndex];
+
+      // Formula for mode
+      let mode = l + ((fm - f1) / ((2 * fm) - f1 - f2)) * h;
+
+      document.getElementById('result').innerHTML = `📊 Mode = <b>${mode.toFixed(2)}</b>`;
+
+      drawChart(L, U, F, modalIndex);
+    }
+
+    function drawChart(L, U, F, modalIndex) {
+      const labels = L.map((l, i) => `${l} - ${U[i]}`);
+
+      const data = {
+        labels: labels,
+        datasets: [{
+          label: 'Frequency',
+          data: F,
+          backgroundColor: F.map((_, i) =>
+            i === modalIndex ? 'rgba(255, 99, 132, 0.7)' : 'rgba(54, 162, 235, 0.6)'
+          ),
+          borderColor: 'rgba(0,0,0,0.2)',
+          borderWidth: 1
+        }]
+      };
+
+      const config = {
+        type: 'bar',
+        data: data,
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Frequency' }
+            },
+            x: {
+              title: { display: true, text: 'Class Intervals' }
+            }
+          }
+        }
+      };
+
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(document.getElementById('freqChart'), config);
+    }
+  </script>
+
+</body>
+</html>
