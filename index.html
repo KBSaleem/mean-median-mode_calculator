@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grouped Data Calculator</title>
+<title>Grouped Data & Trigonometry Calculator</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   body {
@@ -23,9 +23,19 @@
     display: inline-block;
     margin-top: 20px;
   }
-  input, button {
+  input, button, select {
     padding: 8px;
     margin: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  button {
+    background: #00796b;
+    color: white;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #004d40;
   }
   table {
     margin: 15px auto;
@@ -46,6 +56,11 @@
   canvas {
     margin-top: 30px;
   }
+  #triangleCanvas {
+    border: 1px solid #aaa;
+    margin-top: 20px;
+    background-color: #f8f9fa;
+  }
 </style>
 </head>
 <body>
@@ -59,7 +74,28 @@
 <div id="result"></div>
 <canvas id="chart" width="600" height="300"></canvas>
 
+<hr style="margin:40px 0;">
+
+<h1>Heights and Distances</h1>
+<button onclick="showTrigCalculator()">Heights and Distances</button>
+
+<div id="trigContainer" style="display:none;">
+  <p>Assume a right triangle ABC with 90° at B.</p>
+  <label>Known Side:</label>
+  <select id="knownSide">
+    <option value="base">Base (BC)</option>
+    <option value="perp">Perpendicular (AB)</option>
+    <option value="hyp">Hypotenuse (AC)</option>
+  </select><br>
+  <input type="number" id="sideValue" placeholder="Enter side length">
+  <input type="number" id="angleValue" placeholder="Enter other angle (°)">
+  <button onclick="calculateTriangle()">Calculate</button>
+  <div id="trigResult"></div>
+  <canvas id="triangleCanvas" width="400" height="300"></canvas>
+</div>
+
 <script>
+// -------- Grouped Data Section --------
 function createTable() {
   const n = document.getElementById('numIntervals').value;
   if (n <= 0) return alert("Please enter a valid number!");
@@ -89,10 +125,8 @@ function calculate() {
     sumFM += mid[i] * F[i];
   }
 
-  // Mean
   const mean = (sumFM / sumF).toFixed(2);
 
-  // Median
   let cf = [], total = 0;
   for (let i = 0; i < n; i++) {
     total += F[i];
@@ -112,7 +146,6 @@ function calculate() {
   const cfb = medianClass === 0 ? 0 : cf[medianClass - 1];
   const median = (Lm + ((N2 - cfb) / fm) * h).toFixed(2);
 
-  // Mode
   let modalClass = F.indexOf(Math.max(...F));
   const f1 = F[modalClass];
   const f0 = modalClass === 0 ? 0 : F[modalClass - 1];
@@ -123,7 +156,6 @@ function calculate() {
   document.getElementById('result').innerHTML =
     `<p>Mean = ${mean}</p><p>Median = ${median}</p><p>Mode = ${mode}</p>`;
 
-  // Chart
   const ctx = document.getElementById('chart');
   new Chart(ctx, {
     type: 'bar',
@@ -132,17 +164,89 @@ function calculate() {
       datasets: [{
         label: 'Frequency',
         data: F,
-        borderWidth: 1
+        borderWidth: 1,
+        backgroundColor: '#26a69a'
       }]
     },
-    options: {
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
+    options: { scales: { y: { beginAtZero: true } } }
   });
 }
+
+// -------- Heights & Distances Section --------
+function showTrigCalculator() {
+  document.getElementById('trigContainer').style.display = 'block';
+}
+
+function calculateTriangle() {
+  const known = document.getElementById('knownSide').value;
+  const side = parseFloat(document.getElementById('sideValue').value);
+  const angle = parseFloat(document.getElementById('angleValue').value);
+  if (isNaN(side) || isNaN(angle)) return alert("Enter valid numbers!");
+
+  const angleRad = angle * Math.PI / 180;
+  let base, perp, hyp;
+
+  if (known === 'base') {
+    base = side;
+    perp = base * Math.tan(angleRad);
+    hyp = base / Math.cos(angleRad);
+  } else if (known === 'perp') {
+    perp = side;
+    base = perp / Math.tan(angleRad);
+    hyp = perp / Math.sin(angleRad);
+  } else {
+    hyp = side;
+    perp = hyp * Math.sin(angleRad);
+    base = hyp * Math.cos(angleRad);
+  }
+
+  document.getElementById('trigResult').innerHTML =
+    `<p>Base (BC) = ${base.toFixed(2)}</p>
+     <p>Perpendicular (AB) = ${perp.toFixed(2)}</p>
+     <p>Hypotenuse (AC) = ${hyp.toFixed(2)}</p>`;
+
+  // -------- Improved Centered Triangle Drawing --------
+  const canvas = document.getElementById('triangleCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "#00796b";
+  ctx.lineWidth = 2;
+
+  const maxSide = Math.max(base, perp);
+  const scale = 180 / maxSide;
+
+  // Compute triangle dimensions
+  const triWidth = base * scale;
+  const triHeight = perp * scale;
+
+  // Center coordinates
+  const offsetX = (canvas.width - triWidth) / 2;
+  const offsetY = (canvas.height + triHeight) / 2;
+
+  const A = {x: offsetX, y: offsetY - triHeight};
+  const B = {x: offsetX, y: offsetY};
+  const C = {x: offsetX + triWidth, y: offsetY};
+
+  ctx.beginPath();
+  ctx.moveTo(A.x, A.y);
+  ctx.lineTo(B.x, B.y);
+  ctx.lineTo(C.x, C.y);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Mark vertices
+  ctx.font = "16px Arial";
+  ctx.fillText("A", A.x - 15, A.y);
+  ctx.fillText("B (90°)", B.x - 35, B.y + 20);
+  ctx.fillText("C", C.x + 10, C.y + 5);
+
+  // Label sides
+  ctx.fillText(`AB = ${perp.toFixed(2)}`, A.x - 90, (A.y + B.y) / 2);
+  ctx.fillText(`BC = ${base.toFixed(2)}`, (B.x + C.x) / 2 - 30, C.y + 20);
+  ctx.fillText(`AC = ${hyp.toFixed(2)}`, (A.x + C.x) / 2 - 10, (A.y + C.y) / 2 - 10);
+}
 </script>
+
 
 </body>
 </html>
