@@ -1,252 +1,491 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grouped Data & Trigonometry Calculator</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Math Explorer by Khaled Bin Saleem</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to right, #e0f7fa, #f1f8e9);
-    text-align: center;
-    padding: 30px;
-  }
-  h1 {
-    color: #00796b;
-  }
-  .container {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    padding: 20px;
-    display: inline-block;
-    margin-top: 20px;
-  }
-  input, button, select {
-    padding: 8px;
-    margin: 5px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  button {
-    background: #00796b;
-    color: white;
-    cursor: pointer;
-  }
-  button:hover {
-    background: #004d40;
-  }
-  table {
-    margin: 15px auto;
-    border-collapse: collapse;
-  }
-  th, td {
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-  }
-  th {
-    background: #00796b;
-    color: white;
-  }
-  #result {
-    margin-top: 20px;
-    font-weight: bold;
-  }
-  canvas {
-    margin-top: 30px;
-  }
-  #triangleCanvas {
-    border: 1px solid #aaa;
-    margin-top: 20px;
-    background-color: #f8f9fa;
-  }
+/* ====== BASIC PAGE STYLE ====== */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f4faff;
+  color: #002b55;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+header {
+  background: #0080ff;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 1.5em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+/* ====== NAVIGATION TABS ====== */
+nav {
+  display: flex;
+  justify-content: center;
+  background: #e7f1ff;
+  border-bottom: 2px solid #b5d1ff;
+}
+nav button {
+  background: none;
+  border: none;
+  color: #0050aa;
+  padding: 14px 22px;
+  font-size: 1.05em;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+nav button:hover { background: #cfe5ff; color: #002b55; }
+nav button.active {
+  background: #0080ff;
+  color: white;
+  border-radius: 8px 8px 0 0;
+}
+/* ====== TAB CONTENT AREAS ====== */
+section {
+  display: none;
+  padding: 25px;
+  max-width: 900px;
+  margin: 20px auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+  animation: fadeIn 0.45s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* ====== HOME PAGE ====== */
+#home h2 { text-align:center; font-size:1.8em; color:#004080; }
+#home p { text-align:center; font-size:1.05em; margin-top:10px; }
+#startBtn {
+  display:block; margin:25px auto; padding:12px 28px; font-size:1.1em;
+  background:#0080ff; color:white; border:none; border-radius:25px; cursor:pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+#startBtn:hover { background:#0064cc; transform:scale(1.03); }
+/* small responsive tweaks */
+input, select, button { font-size: 0.95em; }
+table input { width: 100%; box-sizing: border-box; padding:6px; }
+/* ====== FOOTER ====== */
+footer {
+  text-align:center; padding:20px; color:#004080; font-size:0.95em; margin-top:auto;
+  opacity:0; animation: fadeFooter 1.6s forwards; animation-delay:1.8s;
+}
+@keyframes fadeFooter { from {opacity:0;} to {opacity:1;} }
+/* canvas centering */
+canvas { display:block; margin: 18px auto; }
+/* small section headings */
+h2 { margin-top:0; color:#003a75; }
 </style>
 </head>
 <body>
+  <header>📘 Math Explorer by Khaled Bin Saleem</header>
 
-<h1>Grouped Data Calculator</h1>
-<p>Enter the number of class intervals:</p>
-<input type="number" id="numIntervals" min="1" placeholder="e.g. 5">
-<button onclick="createTable()">Create Table</button>
+  <nav>
+    <button class="tablink active" onclick="openTab(event,'home')">🏠 Home</button>
+    <button class="tablink" onclick="openTab(event,'statistics')">📊 Statistics</button>
+    <button class="tablink" onclick="openTab(event,'trigonometry')">📐 Trigonometry</button>
+    <button class="tablink" onclick="openTab(event,'algebra')">🧮 Algebra</button>
+  </nav>
 
-<div id="tableContainer"></div>
-<div id="result"></div>
-<canvas id="chart" width="600" height="300"></canvas>
+  <!-- HOME -->
+  <section id="home" style="display:block;">
+    <h2>Welcome to Math Explorer</h2>
+    <p>Explore the beauty of mathematics — from <strong>Statistics</strong> and <strong>Trigonometry</strong> to <strong>Algebra</strong> — with animated visuals and interactive solvers.</p>
+    <button id="startBtn" onclick="openTab(event,'statistics')">Start Exploring ➜</button>
+  </section>
 
-<hr style="margin:40px 0;">
+  <!-- STATISTICS -->
+  <section id="statistics">
+    <h2>Statistics – Mean, Median & Mode (Grouped Data)</h2>
+    <p>Enter number of class intervals:</p>
+    <input type="number" id="classCount" min="1" max="20" placeholder="e.g. 5">
+    <button onclick="createTable()">Create Table</button>
+    <div id="tableContainer"></div>
+    <button id="calcBtn" style="display:none;" onclick="calculateStats()">Calculate</button>
+    <div id="resultStats"></div>
+    <canvas id="barGraph" width="700" height="260" style="display:none;"></canvas>
+  </section>
 
-<h1>Heights and Distances</h1>
-<button onclick="showTrigCalculator()">Heights and Distances</button>
+  <!-- TRIGONOMETRY -->
+  <section id="trigonometry">
+    <h2>Heights & Distances – Right Triangle</h2>
+    <p>Assume right angle at B. Provide one non-right angle (°) and one side:</p>
+    <label>Known side:</label>
+    <select id="sideSelect">
+      <option value="base">Base (BC)</option>
+      <option value="perp">Perpendicular (AB)</option>
+      <option value="hyp">Hypotenuse (AC)</option>
+    </select>
+    <input type="number" id="sideValue" placeholder="Enter side length" style="width:140px;">
+    <input type="number" id="angleValue" placeholder="Enter angle (°)" style="width:140px;">
+    <button onclick="calculateTriangle()">Draw & Calculate</button>
+    <div id="triangleResult"></div>
+    <canvas id="triangleCanvas" width="440" height="320" style="border:1px solid #ddd;"></canvas>
+  </section>
 
-<div id="trigContainer" style="display:none;">
-  <p>Assume a right triangle ABC with 90° at B.</p>
-  <label>Known Side:</label>
-  <select id="knownSide">
-    <option value="base">Base (BC)</option>
-    <option value="perp">Perpendicular (AB)</option>
-    <option value="hyp">Hypotenuse (AC)</option>
-  </select><br>
-  <input type="number" id="sideValue" placeholder="Enter side length">
-  <input type="number" id="angleValue" placeholder="Enter other angle (°)">
-  <button onclick="calculateTriangle()">Calculate</button>
-  <div id="trigResult"></div>
-  <canvas id="triangleCanvas" width="400" height="300"></canvas>
-</div>
+  <!-- ALGEBRA -->
+  <section id="algebra">
+    <h2>Algebraic Equation Solver</h2>
+
+    <div style="margin-bottom:22px;">
+      <h3>Quadratic Equation Solver</h3>
+      <p>Equation: ax² + bx + c = 0</p>
+      <input type="number" id="qa" placeholder="a" style="width:80px;">
+      <input type="number" id="qb" placeholder="b" style="width:80px;">
+      <input type="number" id="qc" placeholder="c" style="width:80px;">
+      <button onclick="solveQuadratic()">Solve & Graph</button>
+      <div id="quadResult"></div>
+      <canvas id="quadCanvas" width="560" height="260" style="border:1px solid #ddd;"></canvas>
+    </div>
+
+    <div>
+      <h3>Linear Equations (Two Variables)</h3>
+      <p>Form: a₁x + b₁y = c₁  and  a₂x + b₂y = c₂</p>
+      <input type="number" id="a1" placeholder="a₁" style="width:80px;">
+      <input type="number" id="b1" placeholder="b₁" style="width:80px;">
+      <input type="number" id="c1" placeholder="c₁" style="width:80px;"><br><br>
+      <input type="number" id="a2" placeholder="a₂" style="width:80px;">
+      <input type="number" id="b2" placeholder="b₂" style="width:80px;">
+      <input type="number" id="c2" placeholder="c₂" style="width:80px;">
+      <button onclick="solveLinear()">Solve & Graph</button>
+      <div id="linearResult"></div>
+      <canvas id="linearCanvas" width="560" height="260" style="border:1px solid #ddd;"></canvas>
+    </div>
+  </section>
+
+  <footer>Created by Khaled Bin Saleem © 2025</footer>
 
 <script>
-// -------- Grouped Data Section --------
+/* Tab switching */
+function openTab(ev, tabName) {
+  const tabs = document.querySelectorAll("section");
+  const buttons = document.querySelectorAll(".tablink");
+  tabs.forEach(t => t.style.display = "none");
+  buttons.forEach(b => b.classList.remove("active"));
+  document.getElementById(tabName).style.display = "block";
+  if(ev && ev.currentTarget) ev.currentTarget.classList.add("active");
+}
+
+/* ====== STATISTICS ====== */
 function createTable() {
-  const n = document.getElementById('numIntervals').value;
-  if (n <= 0) return alert("Please enter a valid number!");
-  
-  let html = `<table><tr><th>Class Interval (lower)</th><th>Class Interval (upper)</th><th>Frequency</th></tr>`;
-  for (let i = 0; i < n; i++) {
-    html += `<tr>
-      <td><input type='number' id='l${i}'></td>
-      <td><input type='number' id='u${i}'></td>
-      <td><input type='number' id='f${i}'></td>
-    </tr>`;
+  const count = parseInt(document.getElementById('classCount').value);
+  if(!count || count <= 0) return alert("Enter valid number of intervals.");
+  let html = "<table border='1' style='margin-top:15px;border-collapse:collapse;width:100%;text-align:center;'><tr><th>Class Interval (l-u)</th><th>Frequency (f)</th></tr>";
+  for(let i=0;i<count;i++){
+    html += `<tr><td><input type='text' id='class${i}' placeholder='e.g. 10-20'></td>
+             <td><input type='number' id='freq${i}'></td></tr>`;
   }
-  html += `</table><button onclick='calculate()'>Calculate Mean, Median & Mode</button>`;
+  html += "</table>";
   document.getElementById('tableContainer').innerHTML = html;
+  document.getElementById('calcBtn').style.display = "inline-block";
+  // hide previous results
+  document.getElementById('resultStats').innerHTML = "";
+  document.getElementById('barGraph').style.display = "none";
 }
 
-function calculate() {
-  const n = document.getElementById('numIntervals').value;
-  let L = [], U = [], F = [], mid = [], sumF = 0, sumFM = 0;
-
-  for (let i = 0; i < n; i++) {
-    L[i] = parseFloat(document.getElementById('l' + i).value);
-    U[i] = parseFloat(document.getElementById('u' + i).value);
-    F[i] = parseFloat(document.getElementById('f' + i).value);
-    mid[i] = (L[i] + U[i]) / 2;
-    sumF += F[i];
-    sumFM += mid[i] * F[i];
+function calculateStats(){
+  let classes=[], freqs=[];
+  const count=parseInt(document.getElementById('classCount').value);
+  for(let i=0;i<count;i++){
+    let cls=document.getElementById('class'+i).value.trim();
+    let fr=parseFloat(document.getElementById('freq'+i).value);
+    if(!cls || isNaN(fr)) return alert("Please fill all values (use class like 10-20).");
+    classes.push(cls); freqs.push(fr);
   }
-
-  const mean = (sumFM / sumF).toFixed(2);
-
-  let cf = [], total = 0;
-  for (let i = 0; i < n; i++) {
-    total += F[i];
-    cf.push(total);
-  }
-  const N2 = sumF / 2;
-  let medianClass = 0;
-  for (let i = 0; i < n; i++) {
-    if (cf[i] >= N2) {
-      medianClass = i;
-      break;
-    }
-  }
-  const Lm = L[medianClass];
-  const fm = F[medianClass];
-  const h = U[medianClass] - L[medianClass];
-  const cfb = medianClass === 0 ? 0 : cf[medianClass - 1];
-  const median = (Lm + ((N2 - cfb) / fm) * h).toFixed(2);
-
-  let modalClass = F.indexOf(Math.max(...F));
-  const f1 = F[modalClass];
-  const f0 = modalClass === 0 ? 0 : F[modalClass - 1];
-  const f2 = modalClass === n - 1 ? 0 : F[modalClass + 1];
-  const Lmo = L[modalClass];
-  const mode = (Lmo + ((f1 - f0) / (2 * f1 - f0 - f2)) * (U[modalClass] - L[modalClass])).toFixed(2);
-
-  document.getElementById('result').innerHTML =
-    `<p>Mean = ${mean}</p><p>Median = ${median}</p><p>Mode = ${mode}</p>`;
-
-  const ctx = document.getElementById('chart');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: mid.map(m => m.toFixed(2)),
-      datasets: [{
-        label: 'Frequency',
-        data: F,
-        borderWidth: 1,
-        backgroundColor: '#26a69a'
-      }]
-    },
-    options: { scales: { y: { beginAtZero: true } } }
+  // calculate midpoints
+  let midpoints = classes.map((cl,i)=>{
+    const parts = cl.split('-').map(s=>s.trim());
+    const l = Number(parts[0]), u = Number(parts[1]);
+    return (l+u)/2;
   });
+  const N = freqs.reduce((a,b)=>a+b,0);
+  const mean = (freqs.reduce((s,f,i)=>s+f*midpoints[i],0))/N;
+
+  // median
+  let cf=[], sum=0;
+  for(let f of freqs){ sum+=f; cf.push(sum); }
+  let medianClassIndex = cf.findIndex(c=>c>=N/2);
+  if(medianClassIndex===-1) medianClassIndex = freqs.length-1;
+  let partsMC = classes[medianClassIndex].split('-').map(Number);
+  let L = partsMC[0], U = partsMC[1];
+  let h = U - L;
+  let Fprev = medianClassIndex==0?0:cf[medianClassIndex-1];
+  let fm = freqs[medianClassIndex];
+  const median = L + ((N/2 - Fprev)/fm)*h;
+
+  // mode (grouped)
+  let modalIndex = freqs.indexOf(Math.max(...freqs));
+  let f1 = freqs[modalIndex];
+  let f0 = modalIndex>0?freqs[modalIndex-1]:0;
+  let f2 = modalIndex<freqs.length-1?freqs[modalIndex+1]:0;
+  let partsMo = classes[modalIndex].split('-').map(Number);
+  let Lmo = partsMo[0], Umo = partsMo[1];
+  const mode = Lmo + ((f1 - f0)/((2*f1) - f0 - f2))*(Umo - Lmo);
+
+  document.getElementById('resultStats').innerHTML=
+    `<p><b>Mean:</b> ${mean.toFixed(2)}<br>
+     <b>Median:</b> ${median.toFixed(2)}<br>
+     <b>Mode:</b> ${mode.toFixed(2)}</p>`;
+
+  drawBarGraph(classes,freqs);
 }
 
-// -------- Heights & Distances Section --------
-function showTrigCalculator() {
-  document.getElementById('trigContainer').style.display = 'block';
+function drawBarGraph(classes,freqs){
+  const canvas = document.getElementById('barGraph');
+  const ctx = canvas.getContext('2d');
+  canvas.style.display = "block";
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // simple animated bars
+  const maxFreq = Math.max(...freqs);
+  const padding = 40;
+  const width = canvas.width - padding*2;
+  const barW = width / freqs.length * 0.7;
+  const gap = (width / freqs.length) - barW;
+  ctx.font = "13px Segoe UI";
+  let progress = 0;
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // axes
+    ctx.strokeStyle = "#ccc";
+    ctx.beginPath();
+    ctx.moveTo(padding, canvas.height - padding);
+    ctx.lineTo(canvas.width-padding, canvas.height - padding);
+    ctx.moveTo(padding, canvas.height - padding);
+    ctx.lineTo(padding, padding);
+    ctx.stroke();
+    for(let i=0;i<freqs.length;i++){
+      const targetH = (freqs[i]/maxFreq) * (canvas.height - padding*2);
+      const currentH = targetH * Math.min(1, progress);
+      const x = padding + i*(barW+gap) + gap/2;
+      const y = canvas.height - padding - currentH;
+      ctx.fillStyle = "#0080ff";
+      ctx.fillRect(x, y, barW, currentH);
+      ctx.fillStyle = "#004080";
+      // labels
+      ctx.fillText(classes[i], x, canvas.height - padding + 14);
+      ctx.fillText(freqs[i], x + barW/2 - 8, y - 6);
+    }
+    progress += 0.03;
+    if(progress < 1.05) requestAnimationFrame(animate);
+  }
+  animate();
 }
 
-function calculateTriangle() {
-  const known = document.getElementById('knownSide').value;
+/* ====== TRIGONOMETRY ====== */
+function calculateTriangle(){
+  const known = document.getElementById('sideSelect').value;
   const side = parseFloat(document.getElementById('sideValue').value);
   const angle = parseFloat(document.getElementById('angleValue').value);
-  if (isNaN(side) || isNaN(angle)) return alert("Enter valid numbers!");
-
-  const angleRad = angle * Math.PI / 180;
+  if(isNaN(side) || isNaN(angle) || angle<=0 || angle>=90){
+    alert("Enter valid side and angle (angle between 0 and 90)."); return;
+  }
+  const angRad = angle * Math.PI / 180;
   let base, perp, hyp;
-
-  if (known === 'base') {
+  if(known === 'base'){
     base = side;
-    perp = base * Math.tan(angleRad);
-    hyp = base / Math.cos(angleRad);
-  } else if (known === 'perp') {
+    perp = Math.tan(angRad) * base;
+    hyp = Math.hypot(base, perp);
+  } else if(known === 'perp'){
     perp = side;
-    base = perp / Math.tan(angleRad);
-    hyp = perp / Math.sin(angleRad);
+    base = perp / Math.tan(angRad);
+    hyp = Math.hypot(base, perp);
   } else {
     hyp = side;
-    perp = hyp * Math.sin(angleRad);
-    base = hyp * Math.cos(angleRad);
+    perp = Math.sin(angRad) * hyp;
+    base = Math.cos(angRad) * hyp;
   }
+  document.getElementById('triangleResult').innerHTML =
+    `<p>Base (BC): ${base.toFixed(2)} units<br>Perpendicular (AB): ${perp.toFixed(2)} units<br>Hypotenuse (AC): ${hyp.toFixed(2)} units</p>`;
+  drawTriangle(base, perp);
+}
 
-  document.getElementById('trigResult').innerHTML =
-    `<p>Base (BC) = ${base.toFixed(2)}</p>
-     <p>Perpendicular (AB) = ${perp.toFixed(2)}</p>
-     <p>Hypotenuse (AC) = ${hyp.toFixed(2)}</p>`;
-
-  // -------- Improved Centered Triangle Drawing --------
+function drawTriangle(base, perp){
   const canvas = document.getElementById('triangleCanvas');
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = "#00796b";
-  ctx.lineWidth = 2;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const maxSide = Math.max(base, perp, 1);
+  const scale = Math.min((canvas.width-80)/ (base||1), (canvas.height-80)/ (perp||1));
+  const triW = base * scale;
+  const triH = perp * scale;
+  const offsetX = (canvas.width - triW)/2;
+  const offsetY = (canvas.height + triH)/2;
 
-  const maxSide = Math.max(base, perp);
-  const scale = 180 / maxSide;
-
-  // Compute triangle dimensions
-  const triWidth = base * scale;
-  const triHeight = perp * scale;
-
-  // Center coordinates
-  const offsetX = (canvas.width - triWidth) / 2;
-  const offsetY = (canvas.height + triHeight) / 2;
-
-  const A = {x: offsetX, y: offsetY - triHeight};
+  const A = {x: offsetX, y: offsetY - triH};
   const B = {x: offsetX, y: offsetY};
-  const C = {x: offsetX + triWidth, y: offsetY};
+  const C = {x: offsetX + triW, y: offsetY};
 
+  // animate drawing progressively
+  let t = 0;
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle = "#00796b"; ctx.lineWidth = 2;
+    ctx.beginPath();
+    // side AB
+    ctx.moveTo(A.x, A.y);
+    const ABx = A.x + (B.x - A.x) * Math.min(1, t*3);
+    const ABy = A.y + (B.y - A.y) * Math.min(1, t*3);
+    ctx.lineTo(ABx, ABy);
+    // side BC
+    if(t*3 > 1){
+      const t2 = Math.min(1, (t*3 - 1));
+      ctx.lineTo(B.x + (C.x - B.x) * t2, B.y + (C.y - B.y) * t2);
+    }
+    // close to AC
+    if(t*3 > 2){
+      const t3 = Math.min(1, (t*3 - 2));
+      ctx.lineTo(A.x + (C.x - A.x) * t3, A.y + (C.y - A.y) * t3);
+    }
+    ctx.stroke();
+
+    // labels fade in when complete
+    if(t > 0.9){
+      ctx.fillStyle = "#004080";
+      ctx.font = "14px Segoe UI";
+      ctx.fillText("A", A.x-14, A.y);
+      ctx.fillText("B (90°)", B.x-38, B.y+18);
+      ctx.fillText("C", C.x+6, C.y+6);
+      ctx.fillText(`AB=${(perp).toFixed(2)}`, A.x-70, (A.y+B.y)/2);
+      ctx.fillText(`BC=${(base).toFixed(2)}`, (B.x+C.x)/2-30, C.y+18);
+      const hypot = Math.hypot(base,perp);
+      ctx.fillText(`AC=${(hypot).toFixed(2)}`, (A.x+C.x)/2-10, (A.y+C.y)/2-10);
+    }
+    t += 0.02;
+    if(t <= 1.2) requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+/* ====== ALGEBRA ====== */
+function solveQuadratic(){
+  const a = parseFloat(document.getElementById('qa').value);
+  const b = parseFloat(document.getElementById('qb').value);
+  const c = parseFloat(document.getElementById('qc').value);
+  if(isNaN(a)||isNaN(b)||isNaN(c)||a===0){ alert("Enter valid coefficients (a ≠ 0)."); return; }
+  const D = b*b - 4*a*c;
+  let out = "";
+  if(D > 0){
+    const r1 = (-b + Math.sqrt(D)) / (2*a);
+    const r2 = (-b - Math.sqrt(D)) / (2*a);
+    out = `Two distinct real roots: x₁=${r1.toFixed(4)}, x₂=${r2.toFixed(4)}`;
+  } else if (Math.abs(D) < 1e-9){
+    const r = -b/(2*a);
+    out = `Equal roots: x=${r.toFixed(4)}`;
+  } else {
+    const real = (-b/(2*a)).toFixed(4);
+    const imag = (Math.sqrt(-D)/(2*a)).toFixed(4);
+    out = `Complex roots: ${real} ± ${imag}i`;
+  }
+  document.getElementById('quadResult').innerHTML = `<p>${out}</p>`;
+  drawParabola(a,b,c);
+}
+
+function drawParabola(a,b,c){
+  const canvas = document.getElementById('quadCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // draw axes
+  const w = canvas.width, h = canvas.height;
+  const originX = w/2, originY = h/2;
+  const scaleX = 30, scaleY = 20;
+  ctx.strokeStyle = "#ddd"; ctx.beginPath();
+  ctx.moveTo(0, originY); ctx.lineTo(w, originY);
+  ctx.moveTo(originX, 0); ctx.lineTo(originX, h);
+  ctx.stroke();
+  // draw parabola with animation
+  ctx.strokeStyle = "#0080ff"; ctx.lineWidth = 2;
+  let xmin = -originX/scaleX, xmax = originX/scaleX;
+  let step = (xmax - xmin) / 400;
+  let x = xmin;
   ctx.beginPath();
-  ctx.moveTo(A.x, A.y);
-  ctx.lineTo(B.x, B.y);
-  ctx.lineTo(C.x, C.y);
-  ctx.closePath();
+  let first = true;
+  function animate(){
+    if(x > xmax){ ctx.stroke(); return; }
+    const y = a*x*x + b*x + c;
+    const sx = originX + x*scaleX;
+    const sy = originY - y*scaleY;
+    if(first){ ctx.moveTo(sx, sy); first=false; } else ctx.lineTo(sx, sy);
+    x += step;
+    ctx.stroke();
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+function solveLinear(){
+  const a1 = parseFloat(document.getElementById('a1').value);
+  const b1 = parseFloat(document.getElementById('b1').value);
+  const c1 = parseFloat(document.getElementById('c1').value);
+  const a2 = parseFloat(document.getElementById('a2').value);
+  const b2 = parseFloat(document.getElementById('b2').value);
+  const c2 = parseFloat(document.getElementById('c2').value);
+  if([a1,b1,c1,a2,b2,c2].some(v=>isNaN(v))){ alert("Enter all coefficients."); return; }
+  const det = a1*b2 - a2*b1;
+  if(Math.abs(det) < 1e-9){ alert("No unique solution (parallel or coincident lines)."); return; }
+  const x = (c1*b2 - c2*b1) / det;
+  const y = (a1*c2 - a2*c1) / det;
+  document.getElementById('linearResult').innerHTML = `<p>Solution: x=${x.toFixed(4)}, y=${y.toFixed(4)}</p>`;
+  drawLines(a1,b1,c1,a2,b2,c2,x,y);
+}
+
+function drawLines(a1,b1,c1,a2,b2,c2,xSol,ySol){
+  const canvas = document.getElementById('linearCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const w = canvas.width, h = canvas.height;
+  const originX = w/2, originY = h/2;
+  const scale = 30;
+
+  // draw axes
+  ctx.strokeStyle = "#ddd"; ctx.beginPath();
+  ctx.moveTo(0, originY); ctx.lineTo(w, originY);
+  ctx.moveTo(originX, 0); ctx.lineTo(originX, h);
   ctx.stroke();
 
-  // Mark vertices
-  ctx.font = "16px Arial";
-  ctx.fillText("A", A.x - 15, A.y);
-  ctx.fillText("B (90°)", B.x - 35, B.y + 20);
-  ctx.fillText("C", C.x + 10, C.y + 5);
+  // function to compute y for given x
+  function yForEq(a,b,c,x){ return (c - a*x)/b; }
 
-  // Label sides
-  ctx.fillText(`AB = ${perp.toFixed(2)}`, A.x - 90, (A.y + B.y) / 2);
-  ctx.fillText(`BC = ${base.toFixed(2)}`, (B.x + C.x) / 2 - 30, C.y + 20);
-  ctx.fillText(`AC = ${hyp.toFixed(2)}`, (A.x + C.x) / 2 - 10, (A.y + C.y) / 2 - 10);
+  // draw two lines with animation
+  const cols = ["#0080ff","#ff6600"];
+  let t=0;
+  function animate(){
+    ctx.clearRect(0,0,w,h);
+    // axes
+    ctx.strokeStyle = "#eee"; ctx.beginPath();
+    ctx.moveTo(0, originY); ctx.lineTo(w, originY);
+    ctx.moveTo(originX, 0); ctx.lineTo(originX, h);
+    ctx.stroke();
+
+    for(let idx=0; idx<2; idx++){
+      const eq = idx===0? [a1,b1,c1] : [a2,b2,c2];
+      ctx.beginPath();
+      ctx.strokeStyle = cols[idx];
+      let first=true;
+      for(let sx = -originX/scale; sx<=originX/scale; sx += 0.1){
+        const sy = yForEq(eq[0], eq[1], eq[2], sx);
+        const X = originX + sx*scale;
+        const Y = originY - sy*scale;
+        if(first){ ctx.moveTo(X, Y); first=false; } else ctx.lineTo(X, Y);
+      }
+      ctx.stroke();
+    }
+
+    // mark intersection
+    const ix = originX + xSol*scale, iy = originY - ySol*scale;
+    ctx.beginPath(); ctx.arc(ix, iy, 5, 0, Math.PI*2); ctx.fillStyle="#004080"; ctx.fill();
+
+    t += 0.02;
+    if(t < 1.2) requestAnimationFrame(animate);
+  }
+  animate();
 }
 </script>
-
 
 </body>
 </html>
