@@ -89,6 +89,7 @@ h2 { margin-top:0; color:#003a75; }
 
   <nav>
     <button class="tablink active" onclick="openTab(event,'home')">🏠 Home</button>
+    <button class="tablink" onclick="openTab(event,'realnumbers')">📗 Real Numbers</button>
     <button class="tablink" onclick="openTab(event,'statistics')">📊 Statistics</button>
     <button class="tablink" onclick="openTab(event,'trigonometry')">📐 Trigonometry</button>
     <button class="tablink" onclick="openTab(event,'algebra')">🧮 Algebra</button>
@@ -100,6 +101,39 @@ h2 { margin-top:0; color:#003a75; }
     <p>Explore the beauty of mathematics — from <strong>Statistics</strong> and <strong>Trigonometry</strong> to <strong>Algebra</strong> — with animated visuals and interactive solvers.</p>
     <button id="startBtn" onclick="openTab(event,'statistics')">Start Exploring ➜</button>
   </section>
+
+  <!-- REAL NUMBERS -->
+  <!-- REAL NUMBERS -->
+<section id="realnumbers">
+  <h2>📗 Real Numbers Tools</h2>
+
+  <!-- LCM & HCF -->
+  <h3>LCM and HCF (Prime Factorization Method)</h3>
+  <p>Enter 2 or 3 numbers separated by commas (e.g. 12,18,30):</p>
+  <input type="text" id="numInput" placeholder="Enter numbers">
+  <button onclick="calculateLCMHCF()">Find LCM & HCF</button>
+  <div id="lcmhcfResult" style="margin-top:12px;"></div>
+
+  <hr style="margin:25px 0;">
+
+  <!-- LOGARITHMS -->
+  <h3>Logarithm Tools</h3>
+  <p><b>Expand or contract logarithmic expressions (base 10 by default):</b></p>
+
+  <label>Expression:</label>
+  <input type="text" id="logExpr" placeholder="e.g. 100*x^3*y^4/z" style="width:60%;">
+  <label>Base:</label>
+  <input type="number" id="logBase" value="10" style="width:70px;">
+  <br><br>
+  <button onclick="expandLogHandler()">Expand Logarithm</button>
+  <button onclick="contractLogHandler()">Contract Logarithm</button>
+  <button onclick="evaluateLogHandler()">Evaluate logₐ(b)</button>
+  <br><br>
+
+  <div id="logResult" style="margin-top:15px;font-family:'Consolas',monospace;color:#004080;"></div>
+</section>
+
+
 
   <!-- STATISTICS -->
   <section id="statistics">
@@ -116,11 +150,11 @@ h2 { margin-top:0; color:#003a75; }
   <!-- TRIGONOMETRY -->
   <section id="trigonometry">
     <h2>Heights & Distances – Right Triangle</h2>
-    <p>Assume right angle at B. Provide one non-right angle (°) and one side:</p>
+    <p>Assume right angle at B. Provide one non-right angle C (°) and one side. Opposite (AB) Adjacent (BC):</p>
     <label>Known side:</label>
     <select id="sideSelect">
-      <option value="base">Base (BC)</option>
-      <option value="perp">Perpendicular (AB)</option>
+      <option value="base">Ajacent (BC)</option>
+      <option value="perp">Opposite (AB)</option>
       <option value="hyp">Hypotenuse (AC)</option>
     </select>
     <input type="number" id="sideValue" placeholder="Enter side length" style="width:140px;">
@@ -163,6 +197,184 @@ h2 { margin-top:0; color:#003a75; }
   <footer>Created by Khaled Bin Saleem © 2025</footer>
 
 <script>
+/* ====== REAL NUMBERS TAB FUNCTIONS ====== */
+
+// ---------- PRIME FACTORIZATION ----------
+function primeFactors(n) {
+  const factors = {};
+  let d = 2;
+  while (n > 1) {
+    while (n % d === 0) {
+      factors[d] = (factors[d] || 0) + 1;
+      n /= d;
+    }
+    d++;
+    if (d * d > n && n > 1) {
+      factors[n] = (factors[n] || 0) + 1;
+      break;
+    }
+  }
+  return factors;
+}
+
+// ---------- LCM & HCF ----------
+function calculateLCMHCF() {
+  const input = document.getElementById("numInput").value.trim();
+  if (!input) return alert("Please enter numbers separated by commas.");
+  const nums = input.split(",").map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+  if (nums.length < 2) return alert("Enter at least two valid numbers.");
+
+  // factorization display
+  const details = nums.map(n => {
+    const f = primeFactors(n);
+    return `<p>${n} = ${Object.entries(f).map(([p, e]) => `${p}<sup>${e}</sup>`).join(" × ")}</p>`;
+  }).join("");
+
+  // HCF
+  const allPrimes = [...new Set(nums.flatMap(n => Object.keys(primeFactors(n)).map(Number)))];
+  const hcf = allPrimes.reduce((acc, p) => {
+    const minExp = Math.min(...nums.map(n => primeFactors(n)[p] || 0));
+    return acc * (minExp > 0 ? Math.pow(p, minExp) : 1);
+  }, 1);
+
+  // LCM
+  const lcm = allPrimes.reduce((acc, p) => {
+    const maxExp = Math.max(...nums.map(n => primeFactors(n)[p] || 0));
+    return acc * (maxExp > 0 ? Math.pow(p, maxExp) : 1);
+  }, 1);
+
+  document.getElementById("lcmhcfResult").innerHTML =
+    `<div style="animation:fadeIn 0.6s;">
+       <h4>Prime Factorization:</h4>${details}
+       <p><b>HCF:</b> ${hcf}</p>
+       <p><b>LCM:</b> ${lcm}</p>
+     </div>`;
+}
+
+// ---------- LOGARITHM EXPANSION ----------
+function expandLogExpression(expr, base = 10) {
+  try {
+    expr = expr.replace(/\s+/g, "");
+    let parts = expr.split("/");
+    let numerator = parts[0];
+    let denominator = parts[1] || "";
+
+    function expandTerm(term, sign = 1) {
+      let tokens = term.split("*");
+      let result = [];
+      for (let t of tokens) {
+        let match = t.match(/^([0-9]+)(\^([0-9]+))?$/);
+        if (match) {
+          let num = parseInt(match[1]);
+          let pow = parseInt(match[3] || 1);
+          const facts = primeFactors(num);
+          for (const [p, exp] of Object.entries(facts)) {
+            let totalExp = exp * pow * sign;
+            result.push(`${totalExp === 1 ? "" : totalExp}log${base}(${p})`);
+          }
+        } else {
+          let vmatch = t.match(/^([a-zA-Z]+)(\^([0-9]+))?$/);
+          if (vmatch) {
+            let varName = vmatch[1];
+            let pow = parseInt(vmatch[3] || 1) * sign;
+            result.push(`${pow === 1 ? "" : pow}log${base}(${varName})`);
+          }
+        }
+      }
+      return result;
+    }
+
+    let expanded = [];
+    expanded.push(...expandTerm(numerator, 1));
+    if (denominator) expanded.push(...expandTerm(denominator, -1));
+    let finalExpr = expanded.join(" + ").replace(/\+\s*-/g, "- ");
+    return finalExpr || "Invalid expression.";
+  } catch {
+    return "Error parsing expression.";
+  }
+}
+
+// ---------- UI Handlers ----------
+function expandLogHandler() {
+  const expr = document.getElementById("logExpr").value;
+  const base = parseFloat(document.getElementById("logBase").value) || 10;
+  const res = expandLogExpression(expr, base);
+  document.getElementById("logResult").innerHTML = `<p>Expanded: ${res}</p>`;
+}
+
+function contractLogHandler() {
+  let expr = document.getElementById("logExpr").value;
+  expr = expr.replace(/\s+/g, "");
+  const base = parseFloat(document.getElementById("logBase").value) || 10;
+
+  try {
+    const parts = expr.split(/(?=\+)|(?=-)/);
+    let numProduct = 1;
+    let denProduct = 1;
+    let symbolicNum = [];
+    let symbolicDen = [];
+
+    for (let p of parts) {
+      const sign = p.startsWith("-") ? -1 : 1;
+      const match = p.match(/(-?\d*)log\d+\(([a-zA-Z0-9]+)\)/);
+
+      if (match) {
+        const coef = parseFloat(match[1] || (sign === -1 ? "-1" : "1"));
+        const arg = match[2];
+
+        if (!isNaN(arg)) {
+          // Numeric value inside log()
+          if (coef > 0) numProduct *= Math.pow(parseFloat(arg), coef);
+          else denProduct *= Math.pow(parseFloat(arg), Math.abs(coef));
+        } else {
+          // Variable term
+          if (coef > 0) symbolicNum.push(`${arg}^${coef}`);
+          else symbolicDen.push(`${arg}^${Math.abs(coef)}`);
+        }
+      }
+    }
+
+    // Simplify numeric part
+    let numericPart = "";
+    if (numProduct !== 1 || denProduct !== 1) {
+      const simplified = denProduct === 1
+        ? numProduct.toFixed(4)
+        : (numProduct / denProduct).toFixed(4);
+      numericPart = simplified.replace(/\.0000$/, "");
+    }
+
+    // Combine symbolic part
+    let expression = "";
+    if (symbolicNum.length || symbolicDen.length) {
+      const numExpr = symbolicNum.join("*");
+      const denExpr = symbolicDen.join("*");
+      expression = `${numExpr}${denExpr ? "/" + denExpr : ""}`;
+    }
+
+    // Merge numeric and symbolic
+    let combined = "";
+    if (numericPart && expression)
+      combined = `${numericPart}*${expression}`;
+    else combined = numericPart || expression || "1";
+
+    const result = `log${base}(${combined})`;
+    document.getElementById("logResult").innerHTML =
+      `<p>Contracted: ${result}</p>`;
+  } catch {
+    document.getElementById("logResult").innerHTML =
+      "Error contracting expression.";
+  }
+}
+
+
+function evaluateLogHandler() {
+  const expr = document.getElementById("logExpr").value.trim();
+  const base = parseFloat(document.getElementById("logBase").value);
+  if (!expr || isNaN(base)) return alert("Enter a valid base and argument.");
+  const value = Math.log(parseFloat(expr)) / Math.log(base);
+  document.getElementById("logResult").innerHTML = `<p>log<sub>${base}</sub>(${expr}) = ${value.toFixed(4)}</p>`;
+}
+
 /* Tab switching */
 function openTab(ev, tabName) {
   const tabs = document.querySelectorAll("section");
@@ -306,61 +518,89 @@ function calculateTriangle(){
   drawTriangle(base, perp);
 }
 
-function drawTriangle(base, perp){
+function drawTriangle(base, perp) {
   const canvas = document.getElementById('triangleCanvas');
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   const maxSide = Math.max(base, perp, 1);
-  const scale = Math.min((canvas.width-80)/ (base||1), (canvas.height-80)/ (perp||1));
+  const scale = Math.min((canvas.width - 80) / base, (canvas.height - 80) / perp);
   const triW = base * scale;
   const triH = perp * scale;
-  const offsetX = (canvas.width - triW)/2;
-  const offsetY = (canvas.height + triH)/2;
+  const offsetX = (canvas.width - triW) / 2;
+  const offsetY = (canvas.height + triH) / 2;
 
-  const A = {x: offsetX, y: offsetY - triH};
-  const B = {x: offsetX, y: offsetY};
-  const C = {x: offsetX + triW, y: offsetY};
+  // Coordinates of vertices
+  const A = { x: offsetX, y: offsetY - triH };
+  const B = { x: offsetX, y: offsetY };
+  const C = { x: offsetX + triW, y: offsetY };
 
-  // animate drawing progressively
   let t = 0;
-  function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = "#00796b"; ctx.lineWidth = 2;
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "#00796b";
+    ctx.lineWidth = 2;
+
     ctx.beginPath();
-    // side AB
-    ctx.moveTo(A.x, A.y);
-    const ABx = A.x + (B.x - A.x) * Math.min(1, t*3);
-    const ABy = A.y + (B.y - A.y) * Math.min(1, t*3);
-    ctx.lineTo(ABx, ABy);
-    // side BC
-    if(t*3 > 1){
-      const t2 = Math.min(1, (t*3 - 1));
-      ctx.lineTo(B.x + (C.x - B.x) * t2, B.y + (C.y - B.y) * t2);
+    // --- Draw sides progressively ---
+    const progress = Math.min(t * 3, 3);
+
+    if (progress <= 1) {
+      // Draw AB
+      const x = A.x + (B.x - A.x) * progress;
+      const y = A.y + (B.y - A.y) * progress;
+      ctx.moveTo(A.x, A.y);
+      ctx.lineTo(x, y);
+    } else if (progress <= 2) {
+      // AB done, draw BC
+      ctx.moveTo(A.x, A.y);
+      ctx.lineTo(B.x, B.y);
+      const t2 = progress - 1;
+      const x = B.x + (C.x - B.x) * t2;
+      const y = B.y + (C.y - B.y) * t2;
+      ctx.lineTo(x, y);
+    } else {
+      // AB & BC done, draw AC (hypotenuse)
+      ctx.moveTo(A.x, A.y);
+      ctx.lineTo(B.x, B.y);
+      ctx.lineTo(C.x, C.y);
+      const t3 = progress - 2;
+      const x = C.x - (C.x - A.x) * (1 - t3);
+      const y = C.y - (C.y - A.y) * (1 - t3);
+      ctx.lineTo(x, y);
     }
-    // close to AC
-    if(t*3 > 2){
-      const t3 = Math.min(1, (t*3 - 2));
-      ctx.lineTo(A.x + (C.x - A.x) * t3, A.y + (C.y - A.y) * t3);
-    }
+
     ctx.stroke();
 
-    // labels fade in when complete
-    if(t > 0.9){
+    // --- Draw labels when complete ---
+    if (t >= 1) {
       ctx.fillStyle = "#004080";
       ctx.font = "14px Segoe UI";
-      ctx.fillText("A", A.x-14, A.y);
-      ctx.fillText("B (90°)", B.x-38, B.y+18);
-      ctx.fillText("C", C.x+6, C.y+6);
-      ctx.fillText(`AB=${(perp).toFixed(2)}`, A.x-70, (A.y+B.y)/2);
-      ctx.fillText(`BC=${(base).toFixed(2)}`, (B.x+C.x)/2-30, C.y+18);
-      const hypot = Math.hypot(base,perp);
-      ctx.fillText(`AC=${(hypot).toFixed(2)}`, (A.x+C.x)/2-10, (A.y+C.y)/2-10);
+      ctx.fillText("A", A.x - 14, A.y);
+      ctx.fillText("B (90°)", B.x - 38, B.y + 18);
+      ctx.fillText("C", C.x + 6, C.y + 6);
+
+      ctx.fillText(`AB=${perp.toFixed(2)}`, A.x - 70, (A.y + B.y) / 2);
+      ctx.fillText(`BC=${base.toFixed(2)}`, (B.x + C.x) / 2 - 30, C.y + 18);
+      const hyp = Math.hypot(base, perp);
+      ctx.fillText(`AC=${hyp.toFixed(2)}`, (A.x + C.x) / 2 - 15, (A.y + C.y) / 2 - 10);
+
+      // Highlight hypotenuse with bright overlay
+      ctx.strokeStyle = "#00c4ff";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y);
+      ctx.lineTo(C.x, C.y);
+      ctx.stroke();
     }
+
     t += 0.02;
-    if(t <= 1.2) requestAnimationFrame(animate);
+    if (t <= 1.3) requestAnimationFrame(animate);
   }
+
   animate();
 }
+
 
 /* ====== ALGEBRA ====== */
 function solveQuadratic(){
