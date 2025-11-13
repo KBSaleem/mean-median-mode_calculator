@@ -162,6 +162,17 @@ h2 { margin-top:0; color:#003a75; }
     <button onclick="calculateTriangle()">Draw & Calculate</button>
     <div id="triangleResult"></div>
     <canvas id="triangleCanvas" width="440" height="320" style="border:1px solid #ddd;"></canvas>
+    <hr style="margin:25px 0;">
+
+    <h3>Trigonometric Expression Evaluator</h3>
+    <p>Enter any trigonometric expression using degrees. Examples:</p>
+    <p><code>sin30 + cos60</code>, <code>(2sin45 + cos30)/tan60</code>, <code>sin^2 45 + cos^2 45</code></p>
+
+    <input type="text" id="trigExpr" placeholder="Enter expression" style="width:70%;padding:6px;">
+    <button onclick="evaluateTrigExpression()">Calculate</button>
+
+    <div id="trigExprResult" style="margin-top:15px;font-size:1.1em;color:#004080;font-family:'Consolas';"></div>
+
   </section>
 
   <!-- ALGEBRA -->
@@ -600,6 +611,51 @@ function drawTriangle(base, perp) {
 
   animate();
 }
+/* ====== TRIGONOMETRIC EXPRESSION EVALUATOR ====== */
+
+// Replace all trig functions with JS-evaluable expressions
+function replaceTrig(exp) {
+  exp = exp.replace(/\s+/g, "");
+
+  // Replace sin^2 θ  →  (Math.sin(θ°))**2
+  exp = exp.replace(/(sin|cos|tan)\^2([0-9]+)/g, function(_, fn, ang){
+    return `(Math.${fn}(${ang}*Math.PI/180)**2)`;
+  });
+
+  // Replace sinθ, cosθ, tanθ  →  Math.sin(θ°)
+  exp = exp.replace(/sin([0-9]+)/g, "Math.sin($1*Math.PI/180)");
+  exp = exp.replace(/cos([0-9]+)/g, "Math.cos($1*Math.PI/180)");
+  exp = exp.replace(/tan([0-9]+)/g, "Math.tan($1*Math.PI/180)");
+
+  // Replace implicit multiplication: 2sin30 → 2*Math.sin(...)
+  exp = exp.replace(/([0-9]+)(Math\.)/g, "$1*$2");
+
+  return exp;
+}
+
+function evaluateTrigExpression() {
+  const input = document.getElementById("trigExpr").value.trim();
+  if (!input) {
+    document.getElementById("trigExprResult").innerHTML = "Please enter an expression.";
+    return;
+  }
+
+  try {
+    let jsExpr = replaceTrig(input);
+    let result = eval(jsExpr);
+
+    if (isNaN(result) || !isFinite(result)) throw "Math error";
+
+    document.getElementById("trigExprResult").innerHTML =
+      `<b>Result:</b> ${result.toFixed(4)}`;
+  }
+  catch (e) {
+    document.getElementById("trigExprResult").innerHTML =
+      `<span style="color:red;">Invalid expression</span>`;
+  }
+}
+
+
 
 
 /* ====== ALGEBRA ====== */
