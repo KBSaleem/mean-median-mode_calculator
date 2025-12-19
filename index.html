@@ -115,6 +115,8 @@ footer { text-align:center; padding:14px; font-size:0.95em; color:var(--muted); 
     <button class="tablink" onclick="openTab(event,'statistics')">📊 Statistics</button>
     <button class="tablink" onclick="openTab(event,'trigonometry')">📐 Trigonometry</button>
     <button class="tablink" onclick="openTab(event,'algebra')">🧮 Algebra</button>
+    <button class="tablink" onclick="openTab(event,'coordinate')">📐 Coordinate Geometry</button>
+
   </nav>
 
   <!-- HOME -->
@@ -350,6 +352,92 @@ det = a1 b2 − a2 b1
     </div>
   </div>
 </section>
+<!-- Coordinate Geometry -->
+<section id="coordinate" style="display:none;">
+  <div class="container">
+
+    <!-- LEFT FORMULAE -->
+    <div class="formula-left">
+      <h3>Formulas</h3>
+
+      <p><b>Distance:</b><br>
+      √[(x₂−x₁)² + (y₂−y₁)²]</p>
+
+      <p><b>Midpoint:</b><br>
+      ((x₁+x₂)/2 , (y₁+y₂)/2)</p>
+
+      <p><b>Section (m:n):</b><br>
+      ((mx₂+nx₁)/(m+n), (my₂+ny₁)/(m+n))</p>
+    </div>
+
+    <!-- CENTER CONTENT -->
+    <div class="main-content-center">
+
+      <h2>Coordinate Geometry Calculator</h2>
+
+      <!-- Distance -->
+      <h3>1. Distance Between Two Points</h3>
+      <p>x₁ <input id="x1"> y₁ <input id="y1"></p>
+      <p>x₂ <input id="x2"> y₂ <input id="y2"></p>
+      <button onclick="distance()">Calculate</button>
+      <div id="dRes"></div>
+
+      <hr>
+
+      <!-- Midpoint -->
+      <h3>2. Midpoint</h3>
+      <button onclick="midpoint()">Calculate</button>
+      <div id="mRes"></div>
+
+      <hr>
+
+      <!-- Centroid -->
+      <h3>3. Centroid of Triangle</h3>
+      x₃ <input id="x3"> y₃ <input id="y3">
+      <button onclick="centroid()">Calculate</button>
+      <div id="cRes"></div>
+
+      <hr>
+
+      <!-- Section Formula -->
+      <h3>4. Section Formula</h3>
+      m <input id="m"> n <input id="n">
+      <button onclick="section()">Calculate</button>
+      <div id="sRes"></div>
+
+      <hr>
+
+      <!-- Area -->
+      <h3>5. Area of Triangle</h3>
+      <button onclick="area()">Calculate</button>
+      <div id="aRes"></div>
+
+      <hr>
+
+      <!-- Slope -->
+      <h3>6. Slope of Line</h3>
+      <button onclick="slope()">Calculate</button>
+      <div id="slRes"></div>
+
+    </div>
+
+    <!-- RIGHT FORMULAE -->
+    <div class="formula-right">
+      <h3>More Formulas</h3>
+
+      <p><b>Centroid:</b><br>
+      ((x₁+x₂+x₃)/3 , (y₁+y₂+y₃)/3)</p>
+
+      <p><b>Area:</b><br>
+      ½ |x₁(y₂−y₃)+x₂(y₃−y₁)+x₃(y₁−y₂)|</p>
+
+      <p><b>Slope:</b><br>
+      (y₂−y₁)/(x₂−x₁)</p>
+    </div>
+
+  </div>
+</section>
+
 
 
   <footer>Created by Khaled Bin Saleem © 2025</footer>
@@ -798,6 +886,44 @@ function evaluateLogHandler(){
   const ans = Math.log(val) / Math.log(base);
   document.getElementById('logResult').innerHTML = `<p>log<sub>${base}</sub>(${val}) = ${ans.toFixed(8)}</p>`;
 }
+function distance(){
+  let d = Math.sqrt((x2.value-x1.value)**2+(y2.value-y1.value)**2);
+  dRes.innerHTML = "Distance = "+d.toFixed(4);
+}
+
+function midpoint(){
+  let mx = (Number(x1.value)+Number(x2.value))/2;
+  let my = (Number(y1.value)+Number(y2.value))/2;
+  mRes.innerHTML = `Midpoint = (${mx}, ${my})`;
+}
+
+function centroid(){
+  let cx = (Number(x1.value)+Number(x2.value)+Number(x3.value))/3;
+  let cy = (Number(y1.value)+Number(y2.value)+Number(y3.value))/3;
+  cRes.innerHTML = `Centroid = (${cx}, ${cy})`;
+}
+
+function section(){
+  let mVal=Number(m.value), nVal=Number(n.value);
+  let sx=(mVal*x2.value+nVal*x1.value)/(mVal+nVal);
+  let sy=(mVal*y2.value+nVal*y1.value)/(mVal+nVal);
+  sRes.innerHTML=`Point = (${sx}, ${sy})`;
+}
+
+function area(){
+  let ar=Math.abs(
+    x1.value*(y2.value-y3.value)+
+    x2.value*(y3.value-y1.value)+
+    x3.value*(y1.value-y2.value)
+  )/2;
+  aRes.innerHTML="Area = "+ar;
+}
+
+function slope(){
+  let sl=(y2.value-y1.value)/(x2.value-x1.value);
+  slRes.innerHTML="Slope = "+sl;
+}
+
 </script>
 
 </body>
