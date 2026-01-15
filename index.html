@@ -116,6 +116,8 @@ footer { text-align:center; padding:14px; font-size:0.95em; color:var(--muted); 
     <button class="tablink" onclick="openTab(event,'trigonometry')">📐 Trigonometry</button>
     <button class="tablink" onclick="openTab(event,'algebra')">🧮 Algebra</button>
     <button class="tablink" onclick="openTab(event,'coordinate')">📐 Coordinate Geometry</button>
+    <button class="tablink" onclick="openTab(event,'progressions')">📈 Progressions</button>
+
 
   </nav>
 
@@ -352,9 +354,11 @@ det = a1 b2 − a2 b1
     </div>
   </div>
 </section>
-<!-- Coordinate Geometry -->
-<section id="coordinate" class="card" style="display:none;">
-  <div class="container">
+
+   <!-- Coordinate Geometry -->
+   <section id="coordinate" class="card" style="display:none;">
+
+   <div class="container">
 
     <!-- LEFT FORMULAE -->
     <div class="formula-left">
@@ -437,6 +441,87 @@ det = a1 b2 − a2 b1
 
   </div>
 </section>
+
+ <!-- PROGRESSION -->
+<section id="progressions" class="card" style="display:none;">
+  <div class="container">
+
+    <!-- LEFT FORMULAE -->
+    <div class="formula-left">
+      <h3>AP Formulae</h3>
+      <p>
+        aₙ = a + (n−1)d<br><br>
+        n = (aₙ − a)/d + 1<br><br>
+        Sₙ = n/2 (a + l)<br><br>
+        Sₙ = n/2 [2a + (n−1)d]
+      </p>
+    </div>
+
+    <!-- CENTER CONTENT -->
+    <div class="main-content-center">
+
+      <h2>Progressions Calculator</h2>
+
+      <!-- AP -->
+      <h3>Arithmetic Progression</h3>
+
+      <p><b>1. Find nᵗʰ term</b></p>
+      a <input id="ap1_a"> d <input id="ap1_d"> n <input id="ap1_n">
+      <button onclick="apNth()">Calculate</button>
+      <div id="ap1_res"></div>
+
+      <hr>
+
+      <p><b>2. Find number of terms (n)</b></p>
+      a <input id="ap2_a"> d <input id="ap2_d"> aₙ <input id="ap2_an">
+      <button onclick="apFindN()">Calculate</button>
+      <div id="ap2_res"></div>
+
+      <hr>
+
+      <p><b>3. Sum (given a, l, n)</b></p>
+      a <input id="ap3_a"> l <input id="ap3_l"> n <input id="ap3_n">
+      <button onclick="apSumALN()">Calculate</button>
+      <div id="ap3_res"></div>
+
+      <hr>
+
+      <p><b>4. Sum (given a, d, n)</b></p>
+      a <input id="ap4_a"> d <input id="ap4_d"> n <input id="ap4_n">
+      <button onclick="apSumADN()">Calculate</button>
+      <div id="ap4_res"></div>
+
+      <hr>
+
+      <!-- GP -->
+      <h3>Geometric Progression</h3>
+
+      <p><b>1. Find nᵗʰ term</b></p>
+      a <input id="gp1_a"> r <input id="gp1_r"> n <input id="gp1_n">
+      <button onclick="gpNth()">Calculate</button>
+      <div id="gp1_res"></div>
+
+      <hr>
+
+      <p><b>2. Find number of terms (n)</b></p>
+      a <input id="gp2_a"> r <input id="gp2_r"> aₙ <input id="gp2_an">
+      <button onclick="gpFindN()">Calculate</button>
+      <div id="gp2_res"></div>
+
+    </div>
+
+    <!-- RIGHT FORMULAE -->
+    <div class="formula-right">
+      <h3>GP Formulae</h3>
+      <p>
+        aₙ = a·rⁿ⁻¹<br><br>
+        n = [log(aₙ/a)] / log(r) + 1
+      </p>
+    </div>
+
+  </div>
+</section>
+
 
 
 
@@ -886,6 +971,7 @@ function evaluateLogHandler(){
   const ans = Math.log(val) / Math.log(base);
   document.getElementById('logResult').innerHTML = `<p>log<sub>${base}</sub>(${val}) = ${ans.toFixed(8)}</p>`;
 }
+
 function distance(){
   let d = Math.sqrt((x2.value-x1.value)**2+(y2.value-y1.value)**2);
   dRes.innerHTML = "Distance = "+d.toFixed(4);
@@ -923,9 +1009,47 @@ function slope(){
   let sl=(y2.value-y1.value)/(x2.value-x1.value);
   slRes.innerHTML="Slope = "+sl;
 }
+/* ===== PROGRESSIONS ===== */
+
+// AP nth term
+function apNth(){
+  let a = +ap1_a.value, d = +ap1_d.value, n = +ap1_n.value;
+  ap1_res.innerHTML = "aₙ = " + (a + (n-1)*d);
+}
+
+// AP find n
+function apFindN(){
+  let a = +ap2_a.value, d = +ap2_d.value, an = +ap2_an.value;
+  ap2_res.innerHTML = "n = " + (((an - a)/d) + 1);
+}
+
+// AP sum (a, l, n)
+function apSumALN(){
+  let a = +ap3_a.value, l = +ap3_l.value, n = +ap3_n.value;
+  ap3_res.innerHTML = "Sₙ = " + (n*(a+l)/2);
+}
+
+// AP sum (a, d, n)
+function apSumADN(){
+  let a = +ap4_a.value, d = +ap4_d.value, n = +ap4_n.value;
+  ap4_res.innerHTML = "Sₙ = " + (n*(2*a+(n-1)*d)/2);
+}
+
+// GP nth term
+function gpNth(){
+  let a = +gp1_a.value, r = +gp1_r.value, n = +gp1_n.value;
+  gp1_res.innerHTML = "aₙ = " + (a*Math.pow(r,n-1));
+}
+
+// GP find n
+function gpFindN(){
+  let a = +gp2_a.value, r = +gp2_r.value, an = +gp2_an.value;
+  let n = Math.log(an/a)/Math.log(r) + 1;
+  gp2_res.innerHTML = "n = " + n.toFixed(4);
+}
+
 
 </script>
 
 </body>
 </html>
-
